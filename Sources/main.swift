@@ -90,6 +90,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(withTitle: "Show Logs in Terminal.app", action: #selector(showLogsInTerminal), keyEquivalent: "")
         menu.addItem(NSMenuItem.separator())  // Separator
 
+        menu.addItem(withTitle: "Run sudo purge in Terminal.app", action: #selector(sudoPurgeInTerminal), keyEquivalent: "")
+        menu.addItem(NSMenuItem.separator())  // Separator
+
         menu.addItem(NSMenuItem(title: "Quit", action: #selector(quit), keyEquivalent: "q"))
         statusItem?.menu = menu
     }
@@ -199,6 +202,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let script = """
             tell application "Terminal"
                 do script "log stream --info --predicate 'process == \\\"MenuBarMonitor\\\"'"
+                activate
+            end tell
+            """
+        let appleScript = NSAppleScript(source: script)
+        var error: NSDictionary? = nil
+        appleScript?.executeAndReturnError(&error)
+        if let error = error {
+            NSLog("Failed to execute AppleScript: \(error)")
+        }
+    }
+
+    @objc func sudoPurgeInTerminal() {
+        let script = """
+            tell application "Terminal"
+                do script "sudo purge"
                 activate
             end tell
             """
@@ -514,15 +532,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Capture page size
         let pageSize = vm_kernel_page_size
 
-        // Calculate memory usage
+        // let freeMemory = Double(vmStats.free_count) * Double(pageSize)
         let activeMemory = Double(vmStats.active_count) * Double(pageSize)
         let inactiveMemory = Double(vmStats.inactive_count) * Double(pageSize)
+        // let speculativeMemory = Double(vmStats.speculative_count) * Double(pageSize)
         let wiredMemory = Double(vmStats.wire_count) * Double(pageSize)
+        // let zeroFillMemory = Double(vmStats.zero_fill_count) * Double(pageSize)
         let compressedMemory = Double(vmStats.compressor_page_count) * Double(pageSize)
+        let purgeableMemory = Double(vmStats.purgeable_count) * Double(pageSize)
+        // let throttledMemory = Double(vmStats.throttled_count) * Double(pageSize)
+        // let internalMemory = Double(vmStats.internal_page_count) * Double(pageSize)
+        // let externalMemory = Double(vmStats.external_page_count) * Double(pageSize)
 
-        let usedMemory = activeMemory + inactiveMemory + wiredMemory + compressedMemory
-        // let usedMemory = activeMemory + wiredMemory + compressedMemory
         let totalMemory = Double(ProcessInfo.processInfo.physicalMemory)
+
+        // Calculate memory usage
+        let usedMemory = activeMemory + inactiveMemory + wiredMemory + compressedMemory + purgeableMemory
+        // let usedMemory = activeMemory + wiredMemory + compressedMemory
+        // let usedMemory = appMemory + wiredMemory + compressedMemory
+        // let usedMemory = activeMemory + inactiveMemory + speculativeMemory + wiredMemory + compressedMemory - purgeableMemory - externalMemory
 
         let memoryUsage = (usedMemory / totalMemory) * 100.0
 
