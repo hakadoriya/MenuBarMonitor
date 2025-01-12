@@ -18,6 +18,8 @@
 
 ## Check List
 
+- [ ] Assign reviewers
+- [ ] Assign assignees
 - [ ] Assign labels
 - [ ] Add appropriate test cases
 
