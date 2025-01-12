@@ -9,7 +9,7 @@ A simple and compact macOS menu bar app that displays your Mac's CPU, memory, Tx
 If you want to install the app, you can build the app using the following commands:
 
 ```bash
-curl -LRo- https://github.com/hakadoriya/MenuBarMonitor/archive/main.tar.gz | tar -xf - && ./MenuBarMonitor-main/build.sh
+curl -LRo- https://github.com/hakadoriya/MenuBarMonitor/archive/main.tar.gz | tar -C /tmp -xf - && /tmp/MenuBarMonitor-main/build.sh
 ```
 
 Then Finder will open, drag and drop `MenuBarMonitor.app` to the Applications folder.
