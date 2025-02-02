@@ -275,7 +275,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Update the graph
         if let button = statusItem?.button {
-            button.image = createGraphImage(dataSets: dataPointDict)
+            autoreleasepool {
+                button.image = createGraphImage(dataSets: dataPointDict)
+            }
         }
 
         // Log output
