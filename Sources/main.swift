@@ -455,6 +455,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             cpuLoad.append(idle)
         }
 
+        let size = vm_size_t(numCPUInfo) * vm_size_t(MemoryLayout<integer_t>.stride)
+        vm_deallocate(mach_task_self_, vm_address_t(bitPattern: cpuInfo), size)
+
         // Calculate usage
         var overallUsage = 0.0
 
