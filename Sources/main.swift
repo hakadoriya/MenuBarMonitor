@@ -192,9 +192,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func restartPingTask() {
         DispatchQueue.main.async { [weak self] in
-            self?.pingTask?.terminate()
-            self?.pingTask = nil
-            self?.startPingTask()
+            guard let self = self else { return }
+            self.pingTask?.terminate()
+            self.pingTask = nil
+            self.startPingTask()
         }
     }
 
@@ -274,7 +275,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Update the graph
         if let button = statusItem?.button {
-            button.image = createGraphImage(dataSets: dataPointDict)
+            autoreleasepool {
+                button.image = createGraphImage(dataSets: dataPointDict)
+            }
         }
 
         // Log output
@@ -330,6 +333,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let image = NSImage(size: size)
 
         image.lockFocus()
+        defer { image.unlockFocus() }
 
         // Drawing the background
         NSColor.clear.set()
@@ -369,7 +373,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         drawFilledLineGraph(data: dataSets["Ping"]!, in: NSRect(x: xOffset, y: 0, width: graphWidth, height: height), maxValue: maxMillisecond, fillColor: pingFillColor, lineColor: pingLineColor)
         drawCenteredText(text: "Ping", in: NSRect(x: xOffset, y: 0, width: graphWidth, height: height), color: NSColor.labelColor)
 
-        image.unlockFocus()
         return image
     }
 
@@ -453,6 +456,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             cpuLoad.append(nice)
             cpuLoad.append(idle)
         }
+
+        let size = vm_size_t(numCPUInfo) * vm_size_t(MemoryLayout<integer_t>.stride)
+        vm_deallocate(mach_task_self_, vm_address_t(bitPattern: cpuInfo), size)
 
         // Calculate usage
         var overallUsage = 0.0
