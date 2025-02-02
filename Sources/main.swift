@@ -192,9 +192,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func restartPingTask() {
         DispatchQueue.main.async { [weak self] in
-            self?.pingTask?.terminate()
-            self?.pingTask = nil
-            self?.startPingTask()
+            guard let self = self else { return }
+            self.pingTask?.terminate()
+            self.pingTask = nil
+            self.startPingTask()
         }
     }
 
@@ -330,6 +331,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let image = NSImage(size: size)
 
         image.lockFocus()
+        defer { image.unlockFocus() }
 
         // Drawing the background
         NSColor.clear.set()
@@ -369,7 +371,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         drawFilledLineGraph(data: dataSets["Ping"]!, in: NSRect(x: xOffset, y: 0, width: graphWidth, height: height), maxValue: maxMillisecond, fillColor: pingFillColor, lineColor: pingLineColor)
         drawCenteredText(text: "Ping", in: NSRect(x: xOffset, y: 0, width: graphWidth, height: height), color: NSColor.labelColor)
 
-        image.unlockFocus()
         return image
     }
 
