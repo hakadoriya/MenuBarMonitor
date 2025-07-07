@@ -69,10 +69,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startPingTask()
 
         // Update periodically
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // Use common mode to keep timer running even when menu is displayed
+        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             Task { @MainActor in self.updateMenu() }
         }
+        RunLoop.current.add(timer, forMode: .common)
     }
 
     @objc func showMenu() {
